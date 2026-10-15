@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AlphabetAI Attendance — AI-Powered Smart Attendance</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">A</div>
+        <div class="brand-text">
+          <h1>AlphabetAI</h1>
+          <span>Smart Attendance</span>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active"><a href="#" data-view="dashboard">📊 Dashboard</a></li>
+        <li class="nav-item"><a href="#" data-view="attendance-queue">🔤 Alphabetical Queue</a></li>
+        <li class="nav-item"><a href="#" data-view="sessions">⏱️ Sessions</a></li>
+        <li class="nav-item"><a href="#" data-view="students">👥 Student Directory</a></li>
+        <li class="nav-item"><a href="#" data-view="register">➕ Add Student</a></li>
+        <li class="nav-item"><a href="#" data-view="enroll">📸 Face Enrollment</a></li>
+        <li class="nav-item"><a href="#" data-view="reports">📈 Reports & Exports</a></li>
+        <li class="nav-item admin-only" style="display:none;"><a href="#" data-view="audit">🔒 Audit Logs</a></li>
+      </ul>
+
+      <div class="user-profile" id="userProfileBar">
+        <div class="user-info">
+          <div class="user-name" id="userNameDisplay">Teacher</div>
+          <div class="user-role" id="userRoleDisplay">Instructor</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <header class="top-bar">
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">☰</button>
+        <div class="top-bar-title" id="pageTitle">AlphabetAI Smart Attendance</div>
+        <div>
+          <span class="badge badge-success">System Online</span>
+        </div>
+      </header>
+
+      <main class="content-body">
+        <!-- 1. LOGIN VIEW -->
+        <section class="view-container" id="view-login">
+          <div style="max-width: 420px; margin: 3rem auto;">
+            <div class="card">
+              <div style="text-align:center; margin-bottom: 1.5rem;">
+                <div class="brand-icon" style="margin: 0 auto 0.75rem auto; width: 48px; height: 48px; font-size: 1.5rem;">A</div>
+                <h2 style="font-size: 1.4rem; color: var(--primary);">AlphabetAI Login</h2>
+                <p style="font-size: 0.85rem; color: var(--secondary);">Secure Teacher & Administrator Authentication</p>
+              </div>
+
+              <div id="loginError" class="badge badge-danger" style="display:none; width:100%; margin-bottom:1rem; padding:0.6rem; justify-content:center;"></div>
+
+              <form id="loginForm">
+                <div class="form-group">
+                  <label for="loginUsername">Username</label>
+                  <input type="text" id="loginUsername" class="form-control" placeholder="e.g. teacher or admin" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                  <label for="loginPassword">Password</label>
+                  <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">Log In</button>
+              </form>
+
+              <div style="margin-top: 1.5rem; padding: 0.85rem; background: var(--gray-50); border-radius: var(--radius); font-size: 0.78rem; color: var(--secondary);">
+                <strong>Demo Credentials:</strong><br>
+                Teacher: <code>teacher</code> / <code>TeacherPassword123!</code><br>
+                Administrator: <code>admin</code> / <code>AdminPassword123!</code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. DASHBOARD VIEW -->
+        <section class="view-container" id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Enrolled Students</div>
+              <div class="stat-value" id="statTotalStudents">0</div>
+              <div class="stat-sub">Active in registered classes</div>
+            </div>
+            <div class="stat-card present">
+              <div class="stat-label">Present Today</div>
+              <div class="stat-value" id="statPresentToday">0</div>
+              <div class="stat-sub">Verified attendance</div>
+            </div>
+            <div class="stat-card absent">
+              <div class="stat-label">Absent Today</div>
+              <div class="stat-value" id="statAbsentToday">0</div>
+              <div class="stat-sub">Recorded absences</div>
+            </div>
+            <div class="stat-card rate">
+              <div class="stat-label">Attendance Rate</div>
+              <div class="stat-value" id="statAttendancePct">0%</div>
+              <div class="stat-sub">Across today's sessions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Biometric Enrolled</div>
+              <div class="stat-value" id="statEnrolledFaces">0</div>
+              <div class="stat-sub">Protected 128D representations</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Attendance Activity</div>
+              <button class="btn btn-primary btn-sm" data-view="sessions">+ Start Attendance</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Class / Roll</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="recentActivityBody">
+                  <tr><td colspan="5" style="text-align:center; padding:1.5rem;">Loading activity...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. STUDENT DIRECTORY VIEW -->
+        <section class="view-container" id="view-students">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Student Directory (<span id="studentTotalCount">0</span>)</div>
+                <p style="font-size:0.82rem; color:var(--secondary);">Sorted Alphabetically A-Z by Normalized Name</p>
+              </div>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <input type="text" id="studentSearch" class="form-control" placeholder="Search name or ID..." style="max-width: 180px;">
+                <select id="studentClassFilter" class="form-control" style="max-width: 140px;">
+                  <option value="">All Classes</option>
+                  <option value="Grade-10A">Grade-10A</option>
+                  <option value="Grade-10B">Grade-10B</option>
+                </select>
+                <select id="studentSortSelect" class="form-control" style="max-width: 160px;">
+                  <option value="alphabetical">A → Z Name</option>
+                  <option value="alphabetical_desc">Z → A Name</option>
+                  <option value="roll_number">Roll Number</option>
+                </select>
+                <button class="btn btn-primary btn-sm" data-view="register">+ Add Student</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>A-Z</th>
+                    <th>Full Name</th>
+                    <th>Student ID</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Biometrics</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                  <tr><td colspan="7" style="text-align:center; padding:1.5rem;">Loading students...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. ADD STUDENT VIEW -->
+        <section class="view-container" id="view-register">
+          <div class="card" style="max-width: 680px; margin: 0 auto;">
+            <div class="card-header">
+              <div class="card-title">Register New Student</div>
+              <button class="btn btn-secondary btn-sm" data-view="students">← Back to Directory</button>
+            </div>
+
+            <form id="registerStudentForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="regStudentId">Student ID *</label>
+                  <input type="text" id="regStudentId" class="form-control" placeholder="e.g. STU-201" required>
+                </div>
+                <div class="form-group">
+                  <label for="regFullName">Full Name *</label>
+                  <input type="text" id="regFullName" class="form-control" placeholder="e.g. Aarav Sharma" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="regRollNumber">Roll Number *</label>
+                  <input type="number" id="regRollNumber" class="form-control" placeholder="e.g. 23" min="1" required>
+                </div>
+                <div class="form-group">
+                  <label for="regClassId">Class ID *</label>
+                  <input type="text" id="regClassId" class="form-control" value="Grade-10A" required>
+                </div>
+                <div class="form-group">
+                  <label for="regSection">Section *</label>
+                  <input type="text" id="regSection" class="form-control" value="A" maxlength="2" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="regAcademicYear">Academic Year</label>
+                  <input type="text" id="regAcademicYear" class="form-control" value="2025-2026">
+                </div>
+                <div class="form-group">
+                  <label for="regEmail">Contact Email</label>
+                  <input type="email" id="regEmail" class="form-control" placeholder="student@school.edu">
+                </div>
+                <div class="form-group">
+                  <label for="regPhone">Guardian Contact Phone</label>
+                  <input type="tel" id="regPhone" class="form-control" placeholder="+91 9876543210">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem; padding: 0.85rem; background: var(--gray-50); border-radius: var(--radius);">
+                <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-weight:500;">
+                  <input type="checkbox" id="regConsentCheckbox" required>
+                  <span>Student/Guardian has signed explicit biometric enrollment consent form.</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: 1rem; width:100%;">Complete Student Registration</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- 5. FACE ENROLLMENT VIEW -->
+        <section class="view-container" id="view-enroll">
+          <div class="card" style="max-width: 680px; margin: 0 auto;">
+            <div class="card-header">
+              <div class="card-title">Biometric Face Enrollment</div>
+              <button class="btn btn-secondary btn-sm" data-view="students">← Back</button>
+            </div>
+
+            <div class="form-group">
+              <label for="enrollStudentSelect">Select Student *</label>
+              <select id="enrollStudentSelect" class="form-control">
+                <option value="">Loading students...</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="padding: 0.75rem; background: var(--gray-50); border-radius: var(--radius);">
+              <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer;">
+                <input type="checkbox" id="enrollConsentCheckbox" checked>
+                <span style="font-size:0.85rem;"><strong>Biometric Consent Verified:</strong> Convert face features into 128-D vector representation for school attendance. Raw photographs will not be retained.</span>
+              </label>
+            </div>
+
+            <div class="camera-wrapper">
+              <div class="camera-box">
+                <video id="enrollVideo" autoplay playsinline muted></video>
+                <div class="camera-overlay">
+                  <div class="face-guide"></div>
+                </div>
+              </div>
+
+              <div class="camera-controls">
+                <button class="btn btn-primary" id="startEnrollCameraBtn">🎥 Open Camera</button>
+                <button class="btn btn-secondary" id="flipEnrollCameraBtn" style="display:none;">🔄 Switch Camera</button>
+                <button class="btn btn-success" id="captureEnrollBtn" style="display:none;">📸 Capture & Enroll Face</button>
+              </div>
+
+              <p style="font-size:0.8rem; color:var(--secondary); text-align:center;">
+                Ensure well-lit environment, neutral facial expression, and no other persons in frame.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. SESSIONS VIEW -->
+        <section class="view-container" id="view-sessions">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Attendance Sessions</div>
+            </div>
+
+            <div style="background: var(--gray-50); padding: 1.25rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+              <h4 style="font-size:0.95rem; margin-bottom:0.75rem;">Create New Attendance Session</h4>
+              <form id="newSessionForm" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) auto; gap:0.75rem; align-items:end;">
+                <div>
+                  <label style="font-size:0.78rem; font-weight:600;">Class ID</label>
+                  <input type="text" id="sessClassId" class="form-control" value="Grade-10A" required>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem; font-weight:600;">Section</label>
+                  <input type="text" id="sessSection" class="form-control" value="A" required>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem; font-weight:600;">Session Name</label>
+                  <input type="text" id="sessName" class="form-control" value="Period 1 Attendance" required>
+                </div>
+                <div>
+                  <label style="font-size:0.78rem; font-weight:600;">Date</label>
+                  <input type="date" id="sessDate" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">+ Start Session</button>
+              </form>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Session Name</th>
+                    <th>Class</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sessionsTableBody">
+                  <tr><td colspan="6" style="text-align:center; padding:1.5rem;">Loading sessions...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. SIGNATURE ALPHABETICAL ATTENDANCE QUEUE VIEW -->
+        <section class="view-container" id="view-attendance-queue">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title" id="queueSessionTitle">Class Attendance Session</div>
+                <div style="font-size:0.82rem; color:var(--secondary);" id="queueSessionDate">Today</div>
+              </div>
+              <div style="display:flex; gap:0.65rem; align-items:center;">
+                <select id="queueSortSelect" class="form-control" style="max-width: 150px; font-size:0.82rem;">
+                  <option value="alphabetical">A → Z Queue</option>
+                  <option value="alphabetical_desc">Z → A Queue</option>
+                  <option value="roll_number">Roll Number</option>
+                </select>
+                <button class="btn btn-danger btn-sm" id="endSessionBtn">End Session</button>
+              </div>
+            </div>
+
+            <!-- Queue Progress -->
+            <div class="queue-progress-bar-container">
+              <div class="queue-progress-bar" id="queueProgressFill"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:var(--secondary); margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;">
+              <span>Progress: <strong id="queueProgressPct" style="color:var(--dark);">0%</strong></span>
+              <span>Verified: <strong id="queueVerifiedCount" style="color:var(--success);">0</strong></span>
+              <span>Pending: <strong id="queuePendingCount" style="color:var(--primary);">0</strong></span>
+              <span>Skipped: <strong id="queueSkippedCount" style="color:var(--warning);">0</strong></span>
+              <span>Total: <strong id="queueTotalCount">0</strong></span>
+            </div>
+
+            <!-- Active Student Card -->
+            <div class="queue-active-card">
+              <div class="queue-active-info">
+                <div class="queue-letter-circle" id="activeStudentLetter">A</div>
+                <div class="queue-student-details">
+                  <div style="font-size:0.75rem; text-transform:uppercase; color:var(--primary); font-weight:700;">Current Queue Student</div>
+                  <h3 id="activeStudentName">Aarav Sharma</h3>
+                  <p id="activeStudentMeta">Roll No: 1 | ID: STU-101</p>
+                  <div style="margin-top:0.35rem;">
+                    <span class="badge badge-success" id="activeStudentEnrollBadge">Face Enrolled</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="queue-actions">
+                <button class="btn btn-warning" id="skipStudentBtn">⤿ Skip to Next</button>
+                <button class="btn btn-secondary" id="manualOverrideBtn">✏️ Manual Mark</button>
+              </div>
+            </div>
+
+            <!-- Queue Layout: Camera & A-Z Student List -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+              <!-- Camera Verification Box -->
+              <div class="card" style="margin-bottom:0; background:var(--gray-50);">
+                <div class="camera-wrapper">
+                  <div class="camera-box">
+                    <video id="queueVideo" autoplay playsinline muted></video>
+                    <div class="camera-overlay">
+                      <div class="face-guide" id="faceGuideOverlay"></div>
+                    </div>
+                  </div>
+
+                  <div class="camera-controls">
+                    <button class="btn btn-primary" id="startQueueCameraBtn">🎥 Start Camera</button>
+                    <button class="btn btn-success" id="verifyFaceBtn" style="display:none;">⚡ Capture & Verify</button>
+                  </div>
+
+                  <p style="font-size:0.78rem; color:var(--secondary); text-align:center;">
+                    System performs 1:1 biometric verification against the selected student representation.
+                  </p>
+                </div>
+              </div>
+
+              <!-- A-Z Alphabetical Student List -->
+              <div class="card" style="margin-bottom:0; padding:1rem;">
+                <div style="font-size:0.88rem; font-weight:700; margin-bottom:0.75rem;">A-Z Attendance Queue Sequence</div>
+                <div class="queue-list-container" id="queueListItems">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. REPORTS & EXPORTS VIEW -->
+        <section class="view-container" id="view-reports">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Attendance Reports & Exports</div>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <select id="reportSessionSelect" class="form-control" style="max-width: 280px;">
+                  <option value="">Loading sessions...</option>
+                </select>
+                <button class="btn btn-primary btn-sm" id="loadReportBtn">Load Report</button>
+                <button class="btn btn-secondary btn-sm" id="downloadCsvBtn">📥 Download CSV</button>
+                <button class="btn btn-secondary btn-sm" id="printReportBtn">🖨️ Print Report</button>
+              </div>
+            </div>
+
+            <div id="reportContentContainer" style="display:none;">
+              <div style="padding:1rem; background:var(--gray-50); border-radius:var(--radius); margin-bottom:1.25rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                <div>
+                  <strong id="repSessName">Session</strong> | <span id="repSessDate">Date</span>
+                </div>
+                <div>
+                  Total: <strong id="repTotal">0</strong> | 
+                  Present: <strong id="repPresent" style="color:var(--success);">0</strong> | 
+                  Absent: <strong id="repAbsent" style="color:var(--danger);">0</strong> | 
+                  Percentage: <strong id="repPct" style="color:var(--primary);">0%</strong>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Roll No</th>
+                      <th>Student Name</th>
+                      <th>Status</th>
+                      <th>Verification Method</th>
+                      <th>Time</th>
+                      <th>Correction</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. AUDIT LOGS VIEW -->
+        <section class="view-container" id="view-audit">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Security & System Audit Logs</div>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Reason / Justification</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <tr><td colspan="5" style="text-align:center; padding:1.5rem;">Loading audit records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <!-- Manual Override Modal -->
+  <div class="modal-backdrop" id="overrideModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="card-title">Manual Attendance Override</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="overrideForm">
+        <p style="font-size:0.9rem; margin-bottom:1rem;">Student: <strong id="overrideStudentName">Student</strong></p>
+        <div class="form-group">
+          <label for="overrideStatus">Status</label>
+          <select id="overrideStatus" class="form-control">
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+            <option value="excused">Excused</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="overrideReason">Documented Reason *</label>
+          <input type="text" id="overrideReason" class="form-control" placeholder="e.g. Camera lighting issue, verified in person" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+          <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Details Modal -->
+  <div class="modal-backdrop" id="studentDetailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="card-title">Student Profile</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div style="font-size:0.9rem; line-height:1.8;">
+        <p><strong>Name:</strong> <span id="modalStudentName">-</span></p>
+        <p><strong>Student ID:</strong> <span id="modalStudentId">-</span></p>
+        <p><strong>Roll Number:</strong> <span id="modalStudentRoll">-</span></p>
+        <p><strong>Class & Section:</strong> <span id="modalStudentClass">-</span></p>
+        <p><strong>Academic Year:</strong> <span id="modalStudentYear">-</span></p>
+        <p><strong>Biometric Consent:</strong> <span id="modalStudentConsent">-</span></p>
+        <p><strong>Face Biometrics:</strong> <span id="modalStudentFace">-</span></p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary modal-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Session Policy Modal -->
+  <div class="modal-backdrop" id="closeSessionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="card-title">Complete Attendance Session</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p style="font-size:0.9rem; margin-bottom:1rem;">
+        Are you sure you want to conclude this attendance session? Choose how unprocessed students should be handled:
+      </p>
+      <div class="form-group">
+        <label for="closingPolicySelect">Closing Policy</label>
+        <select id="closingPolicySelect" class="form-control">
+          <option value="mark_unprocessed_absent">Mark all unprocessed students as Absent (Standard Policy)</option>
+          <option value="keep_unprocessed_pending">Leave unprocessed students unrecorded (Incomplete Session)</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmCloseSessionBtn">Conclude Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Client Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/camera.js"></script>
+  <script src="/static/js/app.js"></script>
+  <script>
+    // Set default date picker to today
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split("T")[0];
+      const sessDate = document.getElementById("sessDate");
+      if (sessDate) sessDate.value = today;
+    });
+  </script>
+</body>
+</html>

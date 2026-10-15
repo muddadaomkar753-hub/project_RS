@@ -1,0 +1,23 @@
+[
+  "tests/test_attendance.py::test_atomic_duplicate_attendance_prevention",
+  "tests/test_attendance.py::test_attendance_correction_with_audit_trail",
+  "tests/test_attendance.py::test_close_session_policy",
+  "tests/test_auth.py::test_jwt_token_generation_and_verification",
+  "tests/test_auth.py::test_password_hashing",
+  "tests/test_auth.py::test_tampered_token_rejection",
+  "tests/test_face_engine.py::test_cosine_similarity_calculation",
+  "tests/test_face_engine.py::test_image_quality_blurry_frame_rejection",
+  "tests/test_face_engine.py::test_image_quality_dark_frame_rejection",
+  "tests/test_face_engine.py::test_verification_decision_boundaries",
+  "tests/test_live_server.py::test_health_endpoint",
+  "tests/test_live_server.py::test_login_flow_and_authenticated_routes",
+  "tests/test_live_server.py::test_unauthenticated_request_rejected",
+  "tests/test_reports.py::test_attendance_percentage_and_session_report",
+  "tests/test_reports.py::test_csv_export_format",
+  "tests/test_sorting.py::test_alphabetical_sorting_order",
+  "tests/test_sorting.py::test_name_normalization",
+  "tests/test_students.py::test_deactivate_student_preserves_record",
+  "tests/test_students.py::test_duplicate_roll_number_in_same_class_rejection",
+  "tests/test_students.py::test_duplicate_student_id_rejection",
+  "tests/test_students.py::test_register_student_success"
+]
